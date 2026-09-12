@@ -1,16 +1,35 @@
 import logging
 import ecommerce_form
+import pytest
 
 logging.basicConfig(
     level=logging.DEBUG,
        filename= 'test.log',
        filemode ='w')
 
-def test_item_invalid():
+@pytest.fixture
+def system():
+    return ecommerce_form.OnlinePurchase()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('quantiy, expected', [(3,True),(-5,False),(0.67,False)])
+def test_validate_quantity(system,quantiy,expected):
+    result = system.validate_quantity(quantiy)
+
+    assert result == expected
+
+@pytest.mark.wip
+@pytest.mark.parametrize('coupon, expected', [('DISCOUNT10',True),('DISCOUNT20',True),('DISCOUNT30',False)])
+def test_validate_coupon(system,coupon,expected):
+    result = system.validate_coupon(coupon)
+
+    assert result == expected
+
+@pytest.mark.system
+def test_item_invalid(system):
     logging.info('TEST CASE 1: RF1(NEGATIVE)')
-
-    system = ecommerce_form.OnlinePurchase()
-
+    
     cart = {
         'Laptop': 0,
         'Mouse': 2
@@ -43,7 +62,7 @@ if __name__ == '__main__':
 
     assert 'greater than 0' in result
 
-
+@pytest.mark.system
 def test_invalid_coupon():
     logging.info('TEST CASE 2: RF3(NEGATIVE)')
 
@@ -62,6 +81,7 @@ def test_invalid_coupon():
 
     assert 'code is not valid' in result
 
+@pytest.mark.system
 def test_check_descount():
     logging.info('TEST CASE 3: RF9(POSITIVE)')
 
